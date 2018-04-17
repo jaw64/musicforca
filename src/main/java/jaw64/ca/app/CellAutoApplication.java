@@ -9,7 +9,7 @@ import javax.imageio.ImageIO;
 import jaw64.ca.CellGroup;
 import jaw64.ca.CellularAutomaton;
 import jaw64.ca.DefaultCellularAutomaton;
-import jaw64.ca.rules.Averaging1DRule;
+import jaw64.ca.rules.Binary1DRule;
 import jaw64.ca.rules.Rule;
 
 /**
@@ -39,7 +39,7 @@ public class CellAutoApplication {
         final int GROUP_WIDTH = 960;
         final int NUM_GENERATIONS = 540;
         CellGroup initialGroup = new CellGroup(GROUP_WIDTH);
-        Rule rule = new Averaging1DRule(0.5f);
+        Rule rule = new Binary1DRule(105);
         Random rand = new Random(1234);
         for (int i = 0; i < GROUP_WIDTH; i++) {
             initialGroup.setValue(Math.abs(rand.nextInt() % 256), i);
