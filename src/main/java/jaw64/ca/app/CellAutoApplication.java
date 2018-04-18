@@ -9,7 +9,7 @@ import javax.imageio.ImageIO;
 import jaw64.ca.CellGroup;
 import jaw64.ca.CellularAutomaton;
 import jaw64.ca.DefaultCellularAutomaton;
-import jaw64.ca.rules.Binary1DRule;
+import jaw64.ca.rules.Additive1DRule;
 import jaw64.ca.rules.Rule;
 
 /**
@@ -38,28 +38,37 @@ public class CellAutoApplication {
     public int run() {
         final int GROUP_WIDTH = 960;
         final int NUM_GENERATIONS = 540;
+        final int SEED = 1950;
+        final int MAX_VALUE = 1 << 23;
         CellGroup initialGroup = new CellGroup(GROUP_WIDTH);
-        Rule rule = new Binary1DRule(105);
-        Random rand = new Random(1234);
+        Rule rule = new Additive1DRule(0, MAX_VALUE - 1, 0.0001f, Additive1DRule.BOTH,
+                Additive1DRule.WRAP);
+        Random rand = new Random(SEED);
         for (int i = 0; i < GROUP_WIDTH; i++) {
-            initialGroup.setValue(Math.abs(rand.nextInt() % 256), i);
+            initialGroup.setValue(Math.abs(rand.nextInt() % MAX_VALUE), i);
         }
+        ///////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////
         CellularAutomaton ca = new DefaultCellularAutomaton(initialGroup, rule);
         BufferedImage image = new BufferedImage(GROUP_WIDTH * 2, NUM_GENERATIONS * 2,
-                BufferedImage.TYPE_BYTE_BINARY);
+                BufferedImage.TYPE_INT_RGB);
+        ///////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////
         for (int r = 0; r < NUM_GENERATIONS; r++) {
             CellGroup iter = ca.getIteration(r);
             for (int c = 0; c < iter.getNumElements(); c++) {
                 int rr = r * 2;
                 int rc = c * 2;
-                int ival = (iter.getValue(c) + 1) % 2;
-                int color = ival == 0 ? Color.BLACK.getRGB() : Color.WHITE.getRGB();
+                int ival = iter.getValue(c);
+                int color = ival % MAX_VALUE;
                 image.setRGB(rc, rr, color);
                 image.setRGB(rc, rr + 1, color);
                 image.setRGB(rc + 1, rr, color);
                 image.setRGB(rc + 1, rr + 1, color);
             }
         }
+        ///////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////
         File output = new File("CATest.png");
         try {
             ImageIO.write(image, "png", output);
