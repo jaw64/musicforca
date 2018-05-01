@@ -81,11 +81,23 @@ public class DefaultCellularAutomaton implements CellularAutomaton {
     }
 
     /**
+     * Removes excess iterations from cache up to provided iteration.
+     * @param latestIteration the latest iteration from the cache
+     */
+    private void purgeCache(int latestIteration) {
+        if (cache.size() > MAX_CACHE_CAPACITY) {
+            int minCacheIteration = latestIteration - MAX_CACHE_CAPACITY + 1;
+            cache.subList(0, minCacheIteration - cacheOffset).clear();
+            cacheOffset = minCacheIteration;
+        }
+    }
+
+    /**
      * Generates a single iteration given the previous iteration.
      * @param prev the previous iteration
      * @return the subsequent iteration
      */
-    private CellGroup generateIteration(CellGroup prev) {
+    private CellGroup generateIteration(final CellGroup prev) {
         final CellGroupDimensions dims = getDimensions();
         final CellGroup ret = new CellGroup(dims);
         final int numDims = dims.getNumDimensions();
@@ -129,19 +141,25 @@ public class DefaultCellularAutomaton implements CellularAutomaton {
                 latestGroup = next;
             }
             cache.addAll(generated);
-            if (cache.size() > MAX_CACHE_CAPACITY) {
-                minCacheIteration = iteration - MAX_CACHE_CAPACITY + 1;
-                cache.subList(0, minCacheIteration - cacheOffset).clear();
-                cacheOffset = minCacheIteration;
-            }
+            purgeCache(iteration);
         }
         else if (iteration <= maxCacheIteration && iteration >= minCacheIteration) {
             // Can't do anything, cache already contains this iteration.
         }
         else {
-            // TODO: implement cache below
+            // TODO: double check this cache implementation when sober lol
+            cache.clear(); // gotta restart my duuudee
+            cache.add(initialGroup);
             final int groupsToGenerate = iteration;
-            System.err.println("NOOOO");
+            CellGroup latestGroup = initialGroup;
+            List<CellGroup> generated = new ArrayList<>(groupsToGenerate);
+            for (int i = 0; i < groupsToGenerate; i++) {
+                CellGroup next = generateIteration(latestGroup);
+                generated.add(next);
+                latestGroup = next;
+            }
+            cache.addAll(generated);
+            purgeCache(iteration);
         }
     }
 

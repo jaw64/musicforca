@@ -55,7 +55,7 @@ public class CellGroup {
             int numDims = dimensions.getNumDimensions();
             for (int i = 0; i < numDims; i++) {
                 int subsize = 1;
-                for (int j = i + 1; j < numDims; i++) {
+                for (int j = i + 1; j < numDims; j++) {
                     subsize *= dimensions.getDimensionSize(j);
                 }
                 ret += subsize * index[i];

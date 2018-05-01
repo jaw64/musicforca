@@ -1,15 +1,14 @@
 package jaw64.ca.app;
 
 import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.Random;
-import javax.imageio.ImageIO;
 import jaw64.ca.CellGroup;
 import jaw64.ca.CellularAutomaton;
 import jaw64.ca.DefaultCellularAutomaton;
-import jaw64.ca.rules.Additive1DRule;
+import jaw64.ca.interpreter.Binary1DImageInterp;
+import jaw64.ca.interpreter.musc1280.LisztIntroInterp;
+import jaw64.ca.interpreter.musc1280.LisztIntroInterp.Type;
+import jaw64.ca.rules.Binary1DRule;
 import jaw64.ca.rules.Rule;
 
 /**
@@ -19,17 +18,9 @@ import jaw64.ca.rules.Rule;
 public class CellAutoApplication {
 
     /**
-     * Array of command line arguments.
-     */
-    private String[] argv;
-
-    /**
      * (constructor) Creates a new CellAutoApplication.
-     * @param argv command line arguments
      */
-    CellAutoApplication(String[] argv) {
-        this.argv = argv;
-    }
+    CellAutoApplication() {}
 
     /**
      * Runs the application.
@@ -38,43 +29,20 @@ public class CellAutoApplication {
     public int run() {
         final int GROUP_WIDTH = 960;
         final int NUM_GENERATIONS = 540;
-        final int SEED = 1950;
-        final int MAX_VALUE = 1 << 23;
+        final int SEED = 5513; // ca5513
         CellGroup initialGroup = new CellGroup(GROUP_WIDTH);
-        Rule rule = new Additive1DRule(0, MAX_VALUE - 1, 0.0001f, Additive1DRule.BOTH,
-                Additive1DRule.WRAP);
+        Rule rule = new Binary1DRule(105);
         Random rand = new Random(SEED);
         for (int i = 0; i < GROUP_WIDTH; i++) {
-            initialGroup.setValue(Math.abs(rand.nextInt() % MAX_VALUE), i);
+            initialGroup.setValue(Math.abs(rand.nextInt() % 2), i);
         }
-        ///////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////
         CellularAutomaton ca = new DefaultCellularAutomaton(initialGroup, rule);
-        BufferedImage image = new BufferedImage(GROUP_WIDTH * 2, NUM_GENERATIONS * 2,
-                BufferedImage.TYPE_INT_RGB);
-        ///////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////
-        for (int r = 0; r < NUM_GENERATIONS; r++) {
-            CellGroup iter = ca.getIteration(r);
-            for (int c = 0; c < iter.getNumElements(); c++) {
-                int rr = r * 2;
-                int rc = c * 2;
-                int ival = iter.getValue(c);
-                int color = ival % MAX_VALUE;
-                image.setRGB(rc, rr, color);
-                image.setRGB(rc, rr + 1, color);
-                image.setRGB(rc + 1, rr, color);
-                image.setRGB(rc + 1, rr + 1, color);
-            }
-        }
-        ///////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////
-        File output = new File("CATest.png");
-        try {
-            ImageIO.write(image, "png", output);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Binary1DImageInterp bin1d = new Binary1DImageInterp("CATest.png", NUM_GENERATIONS);
+        LisztIntroInterp liszt = new LisztIntroInterp(128, 256, Type.ASCENDING);
+        bin1d.setZeroColor(Color.RED);
+        bin1d.setOneColor(Color.BLUE);
+        bin1d.interpret(ca);
+        liszt.interpret(ca);
         return 0;
     }
 
@@ -84,7 +52,7 @@ public class CellAutoApplication {
      */
     public static void main(String[] argv) {
         try {
-            System.exit(new CellAutoApplication(argv).run());
+            System.exit(new CellAutoApplication().run());
         } catch (Exception e) {
             System.err.println("[ERROR]: Exception bubbled up to application "
                     + "level. Exiting with errno 1 & printing stacktrace.");
