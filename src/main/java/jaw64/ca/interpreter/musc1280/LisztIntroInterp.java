@@ -88,15 +88,15 @@ public class LisztIntroInterp implements Interpreter {
     private final int numGenerations;
 
     /**
+     * The type of Liszt interpretation.
+     */
+    private final Type type;
+
+    /**
      * The number of bits from the leftmost cell of the cell group to begin
      * interpreting bits as music.
      */
     private final int bitOffset;
-
-    /**
-     * The type of Liszt interpretation.
-     */
-    private final Type type;
 
     /**
      * The path to write the MIDI file to.
@@ -111,7 +111,7 @@ public class LisztIntroInterp implements Interpreter {
      * melody
      */
     public LisztIntroInterp(int numGenerations) {
-        this(numGenerations, 0, Type.RANDOM, "");
+        this(numGenerations, Type.RANDOM, 0, "");
     }
 
     /**
@@ -120,23 +120,22 @@ public class LisztIntroInterp implements Interpreter {
      * more specifics).
      * @param numGenerations the number of generations for which to interpret a
      * melody
-     * @param bitOffset tells how far off from the leftmost cell of the CA to
-     * look when interpreting cell groups
+     * @param type the way to generate the melody / interpret the data
      */
-    public LisztIntroInterp(int numGenerations, int bitOffset) {
-        this(numGenerations, bitOffset, Type.RANDOM, "");
+    public LisztIntroInterp(int numGenerations, Type type) {
+        this(numGenerations, type, 0, "");
     }
 
     /**
      * (constructor) Creates a CA interpreter used for generating a specific
      * type of melody (see class definition for more specifics).
      * @param numGenerations the number of generations
+     * @param type the way to generate the melody / interpret the data
      * @param bitOffset tells how far off from the leftmost cell of the CA to
      * look when interpreting cell groups
-     * @param type the way to generate the melody / interpret the data
      */
-    public LisztIntroInterp(int numGenerations, int bitOffset, Type type) {
-        this(numGenerations, bitOffset, type, "");
+    public LisztIntroInterp(int numGenerations, Type type, int bitOffset) {
+        this(numGenerations, type, bitOffset, "");
     }
 
     /**
@@ -144,15 +143,15 @@ public class LisztIntroInterp implements Interpreter {
      * type of melody (see class definition for more specifics).
      * @param numGenerations the number of generations for which to interpret a
      * melody
+     * @param type the way to generate the melody / interpret the data
      * @param bitOffset tells how far off from the leftmost cell of the CA to
      * look when interpreting cell groups
-     * @param type the way to generate the melody / interpret the data
      * @param path the path to write the resulting MIDI file to
      */
-    public LisztIntroInterp(int numGenerations, int bitOffset, Type type, String path) {
+    public LisztIntroInterp(int numGenerations, Type type, int bitOffset, String path) {
         this.numGenerations = Math.max(0, numGenerations);
-        this.bitOffset = Math.max(0, bitOffset);
         this.type = type;
+        this.bitOffset = Math.max(0, bitOffset);
         this.path = path;
     }
 
